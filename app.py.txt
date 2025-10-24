@@ -1,0 +1,50 @@
+from flask import Flask, jsonify
+import requests
+from bs4 import BeautifulSoup
+
+app = Flask(__name__)
+
+# Simulación scraping Betano y Xperto
+def get_betano_cuotas():
+    # Este simula la estructura que obtendrás con Selenium/Puppeteer
+    return {
+        "La Serena vs Audax Italiano": [5.00, 3.75, 1.72],
+        "Brentford vs Liverpool": [6.50, 5.00, 1.65],
+        "Valencia vs Villarreal": [5.75, 4.20, 2.20]
+    }
+
+def get_xperto_cuotas():
+    # Aquí scrapeas la tabla desde la web de Xperto
+    return {
+        "La Serena vs Audax Italiano": [2.57, 3.20, 2.60],
+        "Brentford vs Liverpool": [4.25, 4.20, 1.75],
+        "Valencia vs Villarreal": [3.25, 3.60, 2.20]
+    }
+
+def detectar_surebets():
+    resultados = []
+    betano = get_betano_cuotas()
+    xperto = get_xperto_cuotas()
+    partidos = set(betano.keys()).intersection(xperto.keys())
+    for partido in partidos:
+        b = betano[partido]
+        x = xperto[partido]
+        mejores = [max(b[i], x[i]) for i in range(3)]
+        suma_inversos = sum(1/c for c in mejores)
+        margen = 1 - suma_inversos
+        if suma_inversos < 1:
+            resultados.append({
+                'partido': partido,
+                'mejores_cuotas': mejores,
+                'surebet': True,
+                'margen': round(margen * 100, 2)
+            })
+    return resultados
+
+@app.route('/api/surebets')
+def api_surebets():
+    datos = detectar_surebets()
+    return jsonify(datos)
+
+if __name__ == '__main__':
+    app.run(debug=True)

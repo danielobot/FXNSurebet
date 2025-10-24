@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Surebet Automático Betano/Xperto</title>
+</head>
+<body>
+  <h2>Surebets detectados entre Betano y Xperto</h2>
+  <table border="1" id="tabla">
+    <tr>
+      <th>Partido</th>
+      <th>Mejores Cuotas (Local, Empate, Visita)</th>
+      <th>Margen</th>
+      <th>Status</th>
+    </tr>
+  </table>
+  <script>
+    fetch('http://localhost:5000/api/surebets')
+      .then(r => r.json())
+      .then(data => {
+        let tabla = document.getElementById('tabla');
+        data.forEach(ev => {
+          let fila = tabla.insertRow();
+          fila.insertCell().innerText = ev.partido;
+          fila.insertCell().innerText = ev.mejores_cuotas.join(', ');
+          fila.insertCell().innerText = ev.margen + '%';
+          fila.insertCell().innerText = ev.surebet ? '✅ Seguro' : '❌ No';
+        });
+      });
+  </script>
+</body>
+</html>
